@@ -70,7 +70,7 @@ celery -A tasks worker --loglevel=info
 - Task gönderildiğinde uygulama tarafında kuyruğa gönderildiği gözlemlenmiştir  
 
 Görsel:  
-screenshots/1-celery-task-send.png
+![Task Send](screenshots/1-celery-task-send.png)
 
 ---
 
@@ -80,7 +80,7 @@ screenshots/1-celery-task-send.png
 - Worker tarafında task’ın alındığı ve çalıştırıldığı görülmüştür  
 
 Görsel:  
-screenshots/2-celery-task-started.png
+![Task Started](screenshots/2-celery-task-started.png)
 
 ---
 
@@ -93,7 +93,8 @@ celery -A tasks worker --loglevel=info --concurrency=4
 - Aynı anda birden fazla task’ın çalıştığı gözlemlenmiştir  
 
 Görsel:  
-screenshots/3-celery-concurrency.png
+
+![Concurrency](screenshots/3-celery-concurrency.png)
 
 ---
 
@@ -103,7 +104,7 @@ screenshots/3-celery-concurrency.png
 - PENDING, STARTED gibi state değişimleri takip edilmiştir  
 
 Görsel:  
-screenshots/4-celery-task-status.png
+![Task Status](screenshots/4-celery-task-status.png)
 
 ---
 

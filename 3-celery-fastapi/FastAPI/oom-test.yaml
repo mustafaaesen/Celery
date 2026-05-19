@@ -1,0 +1,36 @@
+apiVersion: v1
+# temel Pod objesi
+
+kind: Pod
+#  direkt pod 
+
+metadata:
+  name: oom-test
+  #  pod adı
+
+  namespace: fastapi-um
+  #  namespace
+
+spec:
+  containers:
+    - name: oom-container
+      # container adı
+
+      image: python:3.10
+      # python 
+
+      command:
+        - "python"
+        - "-c"
+        - "a = bytearray(300 * 1024 * 1024)"
+      # → 300MB RAM allocate eder
+      # limitten büyük  crash olacak
+
+      resources:
+        limits:
+          memory: "100Mi"
+          #  max 100MB izin
+
+        requests:
+          memory: "50Mi"
+          #  başlangıç için minimum RAM

@@ -1,0 +1,157 @@
+apiVersion: apps/v1
+#deployment için api versiyonu
+
+kind: Deployment
+#stateless uygulamalar için deployment kullanılır fastapi veri tutmaz bu yüzden
+#deployment tercih edilmiştir replica yönetimi rolling update scale in/out sağlar
+
+metadata:
+  name: fastapi-app
+  #diğer servisler tarafından çağrılacak deployment adı
+
+  namespace: fastapi-um
+  #deployment'ın çalışacağı izolasyon ortamı
+
+
+spec:
+
+  replicas: 2
+  #kaç adet çalıştırılacağı rolling update basic HA için minimum 2 dir
+
+  #---------------------Rolling Update İle Eklenen Kısım-----------------------------------
+
+  strategy:
+    type: RollingUpdate
+    #güncelleme tipi rolling update
+
+    rollingUpdate:
+      maxUnavailable: 1
+      #güncelleme sırasında aynı anda en fazla 1 pod kapalı olabilir
+
+      maxSurge: 1
+      #güncelleme sırasında 1 ekstra pod geçici olarak açılabilir
+
+  #------------------------Rolling Update ile Eklenen Kısım-------------------------
+
+  selector:
+
+    matchLabels:
+      app: fastapi
+      #deployment'ın yöneteceği podlar için etiket atanması
+
+
+  template:
+    #oluşturulacak pod'un şablonu
+
+    metadata:
+      labels:
+        app: fastapi
+        #selector ile eşleşerek podları bulacağı label
+
+
+    spec:
+      containers:
+
+        - name: fastapi
+          #pod içindeki container adı
+
+          image: mustafaaeesen/fastapi-um:2.5
+          #güncel docker image
+          #celery + redis async yapılarını içeren versiyon
+
+          imagePullPolicy: Always
+          #her deploy sırasında image yeniden çekilir
+          #latest veya sürekli değişen taglerde kritik öneme sahiptir
+
+          ports:
+
+            - containerPort: 8000
+              #container içinde dinlenecek port
+              #service bu porta trafik yönlendirir
+
+
+          envFrom:
+
+            - secretRef:
+                name: fastapi-secret
+                #oluşturulan secret'tan değişkenlerin inject edilmesi
+                #database bilgileri gibi hassas bilgiler buradan gelir
+
+
+          env:
+
+            - name: POSTGRES_HOST
+              value: postgres
+              #Kubernetes içinde postgres service adı budur
+              #localhost yerine service adı kullanılır (çok kritik)
+
+            - name: REDIS_HOST
+              value: redis-service
+              #Celery broker olarak redis-service kullanılacak
+
+            - name: REDIS_PORT
+              value: "6379"
+              #Redis service portu
+
+
+          resources:
+            #kaynak yönetimi production disiplini gösterir
+
+            requests:
+              cpu: "100m"
+              #minimum garanti cpu
+              #scheduler buna göre pod yerleştirir
+
+              memory: "128Mi"
+              #minimum garanti hafıza
+
+            limits:
+              cpu: "500m"
+              #maksimum cpu limiti
+
+              memory: "256Mi"
+              #maksimum ram limiti
+              #memory leak durumunda pod öldürülür
+
+
+          readinessProbe:
+            #pod'un trafik almaya hazır olup olmadığını kontrol eder
+
+            #pod çalışsa bile db hazırlığı migration tamamlanması veya uygulamanın boot sürecinde olup
+            #olmadığını kontrol eder
+
+            #bunlar tamam olmadan trafik göndermez
+
+            httpGet:
+
+              path: /health/db
+              #FastAPI main.py içindeki database health endpointi
+
+              port: 8000
+              #container içindeki port
+
+            initialDelaySeconds: 5
+            #pod ayağa kalktıktan sonra ilk kontrol süresi
+
+            periodSeconds: 10
+            #kontrol sıklığı
+
+
+          livenessProbe:
+            #container gerçekten yaşıyor mu kontrol eder
+
+            #deadlock memory leak infinite loop gibi durumlarda
+            #kubernetes pod'u restart eder
+
+            httpGet:
+
+              path: /health/db
+              #uygulamanın gerçekten cevap verip vermediği kontrol edilir
+
+              port: 8000
+
+            initialDelaySeconds: 10
+            #uygulamanın tamamen ayağa kalkması için bekleme süresi
+
+            periodSeconds: 20
+            #kontrol sıklığı

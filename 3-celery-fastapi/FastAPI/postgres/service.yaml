@@ -1,0 +1,24 @@
+#statefulset ile orkestre edilecek db için headless service gereklidir fastapi bu service ile eirşis
+#ve poslara dns atar
+
+apiVersion: v1
+kind: Service 
+#service podlara sabit erişim noktası sağlar
+
+metadata:
+  name: postgres #statefulsetin dns üreteceği isim ataması
+
+  namespace: fastapi-um #çalışacağı namsepace belirtme
+
+spec:
+  clusterIP: None #headless service laodbalancing yapmaz podlara dns verir
+
+  ports:
+
+    - port: 5432 #service'in açtığı port
+
+      targetPort: 5432 #pod içindeki postgres portu
+
+  
+  selector:
+    app: postgres  #service'e bağlanacak podların label ataması

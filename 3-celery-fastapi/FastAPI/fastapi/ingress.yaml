@@ -1,0 +1,33 @@
+apiVersion: networking.k8s.io/v1
+#ingress objeleri için kullanılan api türü
+
+kind: Ingress #nesne türü HTTP routing için
+
+metadata:
+  name: fastapi-ingress #cluster içerisinde ingress adlandırması
+
+  namespace: fastapi-um # nesnenin çalışacağı namespace
+
+
+
+spec:
+  ingressClassName: nginx
+  #kullanılacak ingress çeşidi tanımı (minikube için nginx adon)
+
+  rules:
+    - host: fastapi.local #tarayıcıdaki link ataması localdeyiz 
+
+      http:
+        paths:
+          - path: /
+            #gelen istek path'i
+
+            pathType: Prefix # /İ ile başlayan her şeyi yakalamasını sağlar
+
+            backend:
+              service:
+                name: fastapi-service #trafiğin yönlendirileceği service ataması
+
+                port:
+                  number: 80 #service'in dinlediği port ClusterIP 80
+

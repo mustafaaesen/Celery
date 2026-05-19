@@ -1,0 +1,27 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+
+metadata:
+  name: postgres-restrict
+  namespace: fastapi-um
+
+spec:
+  podSelector:
+    matchLabels:
+      app: postgres
+      # → SADECE postgres pod’larına uygulanır
+
+  policyTypes:
+    - Ingress
+    # → gelen trafiği kontrol et
+
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: fastapi
+              # → SADECE fastapi erişebilir
+
+      ports:
+        - protocol: TCP
+          port: 5432

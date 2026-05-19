@@ -1,0 +1,37 @@
+apiVersion: autoscaling/v2 #hpa için kullanılan api versiyonu
+
+kind: HorizontalPodAutoscaler #nesne türü 
+
+metadata:
+  name: fastapi-hpa
+
+  #cluster içindeki tanımlanan adı
+
+  namespace: fastapi-um # çalışacağı namespace ataması
+
+
+spec:
+
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: deployment
+    name: fastapi-app
+
+    #izlecek deployment bilgilerinin  belirlenmesi
+
+  minReplicas: 2 #minimum pod sayısı
+
+  maxReplicas: 6 #maksimum pod sayısı
+
+  metrics:
+    - type: Resource #kaynak bazlı metrik cpu
+
+      resource:
+        name: cpu #izlenecek resource cpu
+
+        target:
+          type: Utilization
+          # Yüzde bazlı hesaplama
+
+          averageUtilization: 60
+          # Ortalama CPU %60'ı geçerse scale up başlar

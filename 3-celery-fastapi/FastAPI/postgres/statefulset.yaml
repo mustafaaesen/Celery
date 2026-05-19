@@ -1,0 +1,78 @@
+apiVersion: apps/v1
+kind: StatefulSet 
+
+#db statefulsette uygulanır pod kimliği ile disk eşleşmesi sağlanır
+
+metadata:
+  name: postgres
+  #statefulset adı
+
+  namespace: fastapi-um
+
+spec:
+  serviceName: postgres
+  #bir önceki aşamada oluşturulan headless service verilir bunun üzerinden dns üretir
+
+  replicas: 1
+  #şuan için tek replica gerçek projelerde replica+replication olabilir
+
+  selector:
+    matchLabels:
+      app: postgres  #podları eşleştireceği label 
+
+  template:
+    metadata:
+      labels:
+        app: postgres
+        #service'in eşleşeceği yapı selector
+
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:15
+          #yaygın kullanılan postgres version image'ı verildi
+
+          ports:
+            - containerPort: 5432 #postgresin dinlediği port
+
+          env:
+            - name: POSTGRES_DB
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: POSTGRES_DB
+
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: POSTGRES_USER
+
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: POSTGRES_PASSWORD
+                #envFrom yerine tek tek veriyoruz → postgres kesin okur
+
+          volumeMounts:
+            - name: postgres-data
+              mountPath: /var/lib/postgresql/data
+              #postgresın data yazacağı dizin ve pvc nin bağlanacağı yer
+
+  volumeClaimTemplates:
+    #statefulsetin pod başına otomatik pvc oluşturduğu yer kalbi
+
+    - metadata:
+        name: postgres-data
+      
+      spec:
+        accessModes:
+          - ReadWriteOnce
+          #tek node tek pod erişimi sağlanır
+
+        resources:
+          requests:
+            storage: 5Gi #postgresql için ayrılan alan
+
+        storageClassName: standard  #minikube de default storage class name

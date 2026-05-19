@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: celery-worker
+
+spec:
+  replicas: 1
+
+  selector:
+    matchLabels:
+      app: celery
+
+  template:
+    metadata:
+      labels:
+        app: celery
+
+    spec:
+      containers:
+        - name: celery
+
+          image: mustafaaeesen/fastapi-um:2.5
+
+          command:
+            [
+              "celery",
+              "-A",
+              "celery_worker.celery_app",
+              "worker",
+              "--loglevel=info"
+            ]
+
+          env:
+            - name: DATABASE_URL
+              value: postgresql+psycopg2://appuser:secret@postgres:5432/appdb
+
+            - name: REDIS_HOST
+              value: redis-service
+
+            - name: REDIS_PORT
+              value: "6379"

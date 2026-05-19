@@ -1,0 +1,10 @@
+fastapi
+uvicorn
+pydantic
+email-validator
+
+sqlalchemy
+alembic
+psycopg2-binary
+celery
+redis

@@ -1,0 +1,29 @@
+apiVersion: v1 
+#service ap versiyonu
+
+kind: Service 
+#podlara erişim sapğlayacak service 
+
+metadata:
+  name: redis-service
+  #fastapinin bağlanacağı adlaandırma
+
+  namespace: fastapi-um
+  #aynı namepsace üzeeinde çalıaşcaklar
+
+
+spec: 
+  selector:
+    app: redis 
+    #service erişeceği polara label eşleşmesi
+
+  
+  ports:
+    - port: 6379
+
+      #cluster içidne erişelne port
+
+      targetPort: 6379
+
+  type: ClusterIP #sadce cluster içinden erişelebilir
+  

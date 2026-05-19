@@ -1,0 +1,75 @@
+apiVersion: apps/v1 #deployment için api türü
+
+kind: Deployment 
+
+#yaml türü deployment 
+
+metadata:
+  name: redis #kubernetes içindeki deployment unique adı
+
+  namespace: fastapi-um #çalışacağı namespace 
+
+
+spec: 
+  replicas: 1 #redis için tek kopya cache olduğu için
+
+  selector: 
+    matchLabels:
+      app: redis #deploymetn yöneteceği podların label eşletşrimesi
+
+  
+  template:
+    #oluşturulacak podun template i
+
+    metadata:
+      labels:
+        app: redis 
+        #serevice in redis portu bulacağı label ataması
+
+    
+    spec: 
+      containers:
+        - name: redis 
+          #container adı
+
+          image: redis:7
+
+          #docker hubdan çekilecek resmi redis
+
+          ports:
+            - containerPort: 6379
+            #redisin default portu
+
+          resources: #production için resourcce sınır atamaları
+
+            requests: 
+              cpu: "100m"
+              memory: "128Mi"
+                #minimuk granti kaynak
+            limits:
+              cpu: "300m"
+              memory: "256Mi"
+
+              #maximum garanti kaynak
+
+          livenessProbe:
+            #redisin aktiflik durumunu kotnrol eder
+
+            tcpSocket:
+              port: 6379
+              #redis TCP üzerinden çalışır port check
+
+            initialDelaySeconds: 5
+            #container başladıktan sonra ilk kontrol süresi
+
+            periodSeconds: 10 #her 10 saniyede bir durum kontrolü
+
+          readinessProbe:
+            #redisi hazır olup olmaması kontrolü
+
+            tcpSocket:
+              port: 6379
+              
+            initialDelaySeconds: 2
+
+            periodSeconds: 5

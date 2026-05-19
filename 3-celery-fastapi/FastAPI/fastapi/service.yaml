@@ -1,0 +1,20 @@
+apiVersion: v1
+#service objeleri için api versiyonu
+
+kind: Service #nesne adı
+
+metadata:
+  name: fastapi-service #ingress ve diğer nesnelerin erişim sağlayacağı kubernetes altıdnaki adlandırma
+
+  namespace: fastapi-um #çalışacağı namespace beillenmesi (deployment ile aynı olmalı )
+
+spec:
+  type: ClusterIP #cluster içindeki erişim için tanımlanan tip clusterıp ile erişilir
+
+  selector:
+    app: fastapi  #trafik yönlendrieceği pdoların labellarının yazılması
+
+  ports:
+    - port: 80 #service'in cluster içinde dinleyeceği port ingress trafiği yönlendirir buraya
+
+      targetPort: 8000 #container içidneki gerçek port fastapi containerportu

@@ -104,7 +104,8 @@ Görsel:
 - PENDING, STARTED gibi state değişimleri takip edilmiştir  
 
 Görsel:  
-![Task Status](screenshots/4-celery-task-status.png)
+
+![Task Status](screenshots/4-celery-task-retry.png)
 
 ---
 
